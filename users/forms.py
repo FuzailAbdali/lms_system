@@ -7,11 +7,19 @@ from .models import User
 class UserRegistrationForm(forms.ModelForm):
     first_name = forms.CharField(max_length=150)
     last_name = forms.CharField(max_length=150)
+    phone_number = forms.CharField(
+        max_length=20,
+        help_text="Include country code, for example +91XXXXXXXXXX.",
+    )
+    address = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 3}),
+    )
     password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "username", "email", "role", "password"]
+        fields = ["first_name", "last_name", "username", "email", "phone_number", "address", "role", "password"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -21,6 +29,12 @@ class UserRegistrationForm(forms.ModelForm):
         for field in self.fields.values():
             field.widget.attrs["class"] = "form-control"
         self.fields["role"].widget.attrs["class"] = "form-select"
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data["phone_number"].strip()
+        if not phone_number.startswith("+"):
+            raise forms.ValidationError("Phone number must include country code and start with '+'.")
+        return phone_number
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -49,6 +63,17 @@ class UserLoginForm(forms.Form):
         if username and password:
             user = authenticate(username=username, password=password)
             if user is None:
+                existing_user = User.objects.filter(username=username).first()
+                if existing_user and not existing_user.is_active and not existing_user.is_email_verified:
+                    raise forms.ValidationError("Please verify your email with the OTP before logging in.")
                 raise forms.ValidationError("Invalid username or password.")
             cleaned_data["user"] = user
         return cleaned_data
+
+
+class EmailVerificationForm(forms.Form):
+    otp = forms.CharField(max_length=6, min_length=6)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["otp"].widget.attrs["class"] = "form-control"

@@ -1,11 +1,13 @@
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.db.models import Count, Prefetch
 from django.shortcuts import redirect, render
 
 from courses.models import Course, Enrollment
-from .forms import UserLoginForm, UserRegistrationForm
+from .forms import EmailVerificationForm, UserLoginForm, UserRegistrationForm
 from .decorators import role_required
 from .models import User
+from .utils import is_otp_expired, send_verification_otp
 
 
 def redirect_user_by_role(user):
@@ -28,9 +30,20 @@ def register_view(request):
 
     form = UserRegistrationForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = form.save()
-        login(request, user)
-        return redirect(redirect_user_by_role(user))
+        user = form.save(commit=False)
+        user.is_active = False
+        user.is_email_verified = False
+        user.set_email_otp()
+        user.save()
+        try:
+            send_verification_otp(user)
+        except Exception:
+            user.delete()
+            form.add_error(None, "Could not send verification email. Please check SMTP settings and try again.")
+        else:
+            request.session["pending_verification_user_id"] = user.id
+            messages.success(request, "We sent an OTP to your email. Please verify your account.")
+            return redirect("verify_email")
 
     return render(request, "users/register.html", {"form": form})
 
@@ -50,6 +63,65 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect("login")
+
+
+def verify_email_view(request):
+    if request.user.is_authenticated:
+        return redirect(redirect_user_by_role(request.user))
+
+    pending_user_id = request.session.get("pending_verification_user_id")
+    if not pending_user_id:
+        messages.info(request, "Please create your account first.")
+        return redirect("register")
+
+    user = User.objects.filter(pk=pending_user_id, is_email_verified=False).first()
+    if not user:
+        request.session.pop("pending_verification_user_id", None)
+        messages.info(request, "Your account is already verified. Please log in.")
+        return redirect("login")
+
+    form = EmailVerificationForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        otp = form.cleaned_data["otp"]
+        if is_otp_expired(user):
+            form.add_error("otp", "This OTP has expired. Please request a new one.")
+        elif user.email_otp != otp:
+            form.add_error("otp", "Invalid OTP. Please try again.")
+        else:
+            user.is_active = True
+            user.is_email_verified = True
+            user.email_otp = ""
+            user.email_otp_created_at = None
+            user.save(update_fields=["is_active", "is_email_verified", "email_otp", "email_otp_created_at"])
+            request.session.pop("pending_verification_user_id", None)
+            login(request, user)
+            messages.success(request, "Email verified successfully.")
+            return redirect(redirect_user_by_role(user))
+
+    return render(request, "users/verify_email.html", {"form": form, "email": user.email})
+
+
+def resend_otp_view(request):
+    pending_user_id = request.session.get("pending_verification_user_id")
+    if not pending_user_id:
+        messages.info(request, "Please create your account first.")
+        return redirect("register")
+
+    user = User.objects.filter(pk=pending_user_id, is_email_verified=False).first()
+    if not user:
+        request.session.pop("pending_verification_user_id", None)
+        messages.info(request, "Your account is already verified. Please log in.")
+        return redirect("login")
+
+    user.set_email_otp()
+    user.save(update_fields=["email_otp", "email_otp_created_at"])
+    try:
+        send_verification_otp(user)
+    except Exception:
+        messages.error(request, "Could not resend OTP email. Please check SMTP settings.")
+    else:
+        messages.success(request, "A new OTP has been sent to your email.")
+    return redirect("verify_email")
 
 
 def admin_dashboard(request):

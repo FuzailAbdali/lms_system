@@ -1,5 +1,8 @@
+import secrets
+
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
+from django.utils import timezone
 
 
 class CustomUserManager(UserManager):
@@ -25,6 +28,11 @@ class User(AbstractUser):
         choices=Role.choices,
         default=Role.STUDENT,
     )
+    phone_number = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+    is_email_verified = models.BooleanField(default=True)
+    email_otp = models.CharField(max_length=6, blank=True)
+    email_otp_created_at = models.DateTimeField(blank=True, null=True)
 
     objects = CustomUserManager()
 
@@ -32,6 +40,10 @@ class User(AbstractUser):
         if self.is_superuser:
             self.role = self.Role.ADMIN
         super().save(*args, **kwargs)
+
+    def set_email_otp(self):
+        self.email_otp = f"{secrets.randbelow(900000) + 100000}"
+        self.email_otp_created_at = timezone.now()
 
     def is_teacher(self):
         return self.role == self.Role.TEACHER
