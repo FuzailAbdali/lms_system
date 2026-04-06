@@ -98,10 +98,16 @@
                         <div class="d-grid gap-2">
                             {% if request.user.is_superuser or request.user.role == "admin" %}
                                 <a href="{% url 'admin_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}">Dashboard</a>
+                                <a href="{% url 'course_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'course_list' %} active{% endif %}">Courses</a>
+                                <a href="{% url 'enrollment_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'enrollment_list' or request.resolver_match.url_name == 'remove_enrollment' %} active{% endif %}">Enrollments</a>
                             {% elif request.user.role == "teacher" %}
                                 <a href="{% url 'teacher_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'teacher_dashboard' %} active{% endif %}">Dashboard</a>
+                                <a href="{% url 'course_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'course_list' or request.resolver_match.url_name == 'teacher_course_create' or request.resolver_match.url_name == 'teacher_course_update' or request.resolver_match.url_name == 'teacher_course_delete' %} active{% endif %}">Courses</a>
+                                <a href="{% url 'enrollment_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'enrollment_list' or request.resolver_match.url_name == 'remove_enrollment' %} active{% endif %}">Enrollments</a>
                             {% elif request.user.role == "student" %}
                                 <a href="{% url 'student_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'student_dashboard' %} active{% endif %}">Dashboard</a>
+                                <a href="{% url 'course_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'course_list' %} active{% endif %}">Courses</a>
+                                <a href="{% url 'enrollment_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'enrollment_list' or request.resolver_match.url_name == 'remove_enrollment' %} active{% endif %}">Enrollments</a>
                             {% endif %}
                         </div>
                     </div>

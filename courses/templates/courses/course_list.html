@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Courses{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h2 class="h3 mb-2">Courses</h2>
+            <p class="text-muted mb-0">Browse available courses and manage learning access by role.</p>
+        </div>
+        {% if request.user.role == "teacher" %}
+            <a href="{% url 'teacher_course_create' %}" class="btn btn-primary">Create Course</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="row g-4">
+    {% for course in courses %}
+        <div class="col-xl-6">
+            <div class="card stat-card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <h3 class="h4 mb-1">{{ course.title }}</h3>
+                            <p class="text-muted mb-0">Teacher: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
+                        </div>
+                        <span class="badge text-bg-light">{{ course.enrolled_students_count }} enrolled</span>
+                    </div>
+                    <p class="text-muted">{{ course.description|truncatewords:28 }}</p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if request.user.role == "teacher" and request.user.id == course.teacher_id %}
+                            <a href="{% url 'teacher_course_update' course.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                            <a href="{% url 'teacher_course_delete' course.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                        {% elif request.user.role == "student" %}
+                            {% if course.id in enrolled_course_ids %}
+                                <button class="btn btn-success btn-sm" disabled>Enrolled</button>
+                            {% else %}
+                                <form method="post" action="{% url 'enroll_course' course.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm">Enroll</button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="card stat-card">
+                <div class="card-body p-4">
+                    <p class="mb-0 text-muted">No courses available yet.</p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+

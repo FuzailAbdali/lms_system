@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h2 class="h3 mb-2">{{ title }}</h2>
+            <p class="text-muted mb-0">
+                {% if can_manage_enrollments %}
+                    Review enrollment records and remove entries when needed.
+                {% else %}
+                    Review your current course enrollments.
+                {% endif %}
+            </p>
+        </div>
+        <a href="{% url 'course_list' %}" class="btn btn-outline-primary">Back To Courses</a>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="card stat-card">
+    <div class="card-body p-4">
+        {% if enrollments %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            {% if request.user.is_superuser or request.user.role == "admin" %}
+                                <th>Teacher</th>
+                            {% endif %}
+                            <th>Student</th>
+                            <th>Email</th>
+                            <th>Enrolled At</th>
+                            {% if can_manage_enrollments %}
+                                <th class="text-end">Action</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                            <tr>
+                                <td>{{ enrollment.course.title }}</td>
+                                {% if request.user.is_superuser or request.user.role == "admin" %}
+                                    <td class="text-muted">{{ enrollment.course.teacher.get_full_name|default:enrollment.course.teacher.username }}</td>
+                                {% endif %}
+                                <td>{{ enrollment.student.get_full_name|default:enrollment.student.username }}</td>
+                                <td class="text-muted">{{ enrollment.student.email|default:"-" }}</td>
+                                <td class="text-muted">{{ enrollment.enrolled_at|date:"M d, Y h:i A" }}</td>
+                                {% if can_manage_enrollments %}
+                                    <td class="text-end">
+                                        <a href="{% url 'remove_enrollment' enrollment.pk %}" class="btn btn-outline-danger btn-sm">Remove</a>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="mb-0 text-muted">No enrollment records found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
