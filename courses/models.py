@@ -21,6 +21,26 @@ class Course(models.Model):
         return self.title
 
 
+class Chapter(models.Model):
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="chapters",
+    )
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    order = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        unique_together = ("course", "order")
+
+    def __str__(self):
+        return f"{self.course.title} - {self.title}"
+
+
 class Enrollment(models.Model):
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -41,4 +61,3 @@ class Enrollment(models.Model):
 
     def __str__(self):
         return f"{self.student.username} -> {self.course.title}"
-

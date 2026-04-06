@@ -37,9 +37,11 @@
 
                     <div class="d-flex flex-wrap gap-2">
                         {% if request.user.role == "teacher" and request.user.id == course.teacher_id %}
+                            <a href="{% url 'chapter_list' course.pk %}" class="btn btn-outline-secondary btn-sm">Chapters</a>
                             <a href="{% url 'teacher_course_update' course.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
                             <a href="{% url 'teacher_course_delete' course.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
                         {% elif request.user.role == "student" %}
+                            <a href="{% url 'chapter_list' course.pk %}" class="btn btn-outline-secondary btn-sm">View Chapters</a>
                             {% if course.id in enrolled_course_ids %}
                                 <button class="btn btn-success btn-sm" disabled>Enrolled</button>
                             {% else %}
@@ -48,6 +50,8 @@
                                     <button type="submit" class="btn btn-primary btn-sm">Enroll</button>
                                 </form>
                             {% endif %}
+                        {% else %}
+                            <a href="{% url 'chapter_list' course.pk %}" class="btn btn-outline-secondary btn-sm">View Chapters</a>
                         {% endif %}
                     </div>
                 </div>
@@ -64,4 +68,3 @@
     {% endfor %}
 </div>
 {% endblock %}
-
