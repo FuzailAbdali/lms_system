@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h2 class="h3 mb-2">{{ title }}</h2>
+            <p class="text-muted mb-0">Browse {{ role_label|lower }} accounts and open detailed profile management pages.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_user_create' %}" class="btn btn-primary">Add User</a>
+            <a href="{% url 'admin_user_management' %}" class="btn btn-outline-secondary">Back</a>
+        </div>
+    </div>
+</div>
+
+{% if users_list %}
+    <div class="card stat-card">
+        <div class="card-body p-4">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>{{ role_label }}</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                            <th class="text-end">View</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for managed_user in users_list %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ managed_user.get_full_name|default:managed_user.username }}</div>
+                                    <div class="text-muted small">{{ managed_user.username }}</div>
+                                </td>
+                                <td>
+                                    <div>{{ managed_user.email|default:"-" }}</div>
+                                    <div class="text-muted small">{{ managed_user.phone_number|default:"-" }}</div>
+                                </td>
+                                <td>
+                                    {% if managed_user.is_approved %}
+                                        <span class="badge text-bg-success">Approved</span>
+                                    {% else %}
+                                        <span class="badge text-bg-warning">Pending</span>
+                                    {% endif %}
+                                    {% if managed_user.is_active %}
+                                        <span class="badge text-bg-primary">Active</span>
+                                    {% else %}
+                                        <span class="badge text-bg-danger">Blocked / Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if role_label == "Teacher" %}
+                                        <a href="{% url 'admin_teacher_detail' managed_user.pk %}" class="btn btn-outline-primary btn-sm">Detail</a>
+                                    {% else %}
+                                        <a href="{% url 'admin_student_detail' managed_user.pk %}" class="btn btn-outline-primary btn-sm">Detail</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="card stat-card">
+        <div class="card-body p-4">
+            <p class="mb-0 text-muted">No {{ role_label|lower }} accounts found.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+

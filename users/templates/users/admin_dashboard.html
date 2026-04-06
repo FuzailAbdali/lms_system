@@ -22,18 +22,37 @@
     <div class="col-md-4">
         <div class="card stat-card h-100">
             <div class="card-body p-4">
-                <p class="text-muted mb-2">Total Courses</p>
-                <h3 class="display-6 mb-0">{{ total_courses }}</h3>
-                <small class="text-muted">Courses created by teachers across the platform.</small>
+                <p class="text-muted mb-2">Teachers / Students</p>
+                <h3 class="display-6 mb-0">{{ total_teachers }} / {{ total_students }}</h3>
+                <small class="text-muted">Role-wise user overview for the platform.</small>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card stat-card h-100">
             <div class="card-body p-4">
+                <p class="text-muted mb-2">Pending Approvals</p>
+                <h3 class="display-6 mb-0">{{ pending_users }}</h3>
+                <small class="text-muted">Accounts waiting for admin approval.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-md-6">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <p class="text-muted mb-2">Total Courses</p>
+                <h3 class="display-6 mb-0">{{ total_courses }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
                 <p class="text-muted mb-2">Total Enrollments</p>
                 <h3 class="display-6 mb-0">{{ total_enrollments }}</h3>
-                <small class="text-muted">Student participation across all courses.</small>
             </div>
         </div>
     </div>
@@ -50,7 +69,10 @@
                 <p class="text-muted mb-0">No winner selected yet.</p>
             {% endif %}
         </div>
-        <a href="{% url 'article_list' %}" class="btn btn-outline-primary">Manage Articles</a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_user_management' %}" class="btn btn-primary">Manage Users</a>
+            <a href="{% url 'article_list' %}" class="btn btn-outline-primary">Manage Articles</a>
+        </div>
     </div>
 </div>
 

@@ -1,0 +1,60 @@
+{% if users %}
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for managed_user in users %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ managed_user.get_full_name|default:managed_user.username }}</div>
+                            <div class="text-muted small">{{ managed_user.username }} | {{ managed_user.get_role_display }}</div>
+                        </td>
+                        <td>
+                            <div>{{ managed_user.email|default:"-" }}</div>
+                            <div class="text-muted small">{{ managed_user.phone_number|default:"-" }}</div>
+                        </td>
+                        <td>
+                            {% if managed_user.is_approved %}
+                                <span class="badge text-bg-success">Approved</span>
+                            {% else %}
+                                <span class="badge text-bg-warning">Pending Approval</span>
+                            {% endif %}
+                            {% if managed_user.is_active %}
+                                <span class="badge text-bg-primary">Active</span>
+                            {% else %}
+                                <span class="badge text-bg-danger">Blocked / Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end flex-wrap gap-2">
+                                <form method="post" action="{% url 'admin_user_toggle_approval' managed_user.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                        {% if managed_user.is_approved %}Unapprove{% else %}Approve{% endif %}
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'admin_user_toggle_block' managed_user.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-warning btn-sm">
+                                        {% if managed_user.is_active %}Block{% else %}Unblock{% endif %}
+                                    </button>
+                                </form>
+                                <a href="{% url 'admin_user_delete' managed_user.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="mb-0 text-muted">No users found in this section.</p>
+{% endif %}
+

@@ -24,9 +24,9 @@
             <div class="col-md-6">
                 <div class="card stat-card h-100">
                     <div class="card-body p-4">
-                        <h3 class="h5">Total Enrollments</h3>
-                        <p class="display-6 mb-0">{{ total_teacher_enrollments }}</p>
-                        <p class="mb-0 text-muted">Manage student participation across your courses below.</p>
+                        <h3 class="h5">Students In Your Courses</h3>
+                        <p class="display-6 mb-0">{{ teacher_students_count }}</p>
+                        <p class="mb-0 text-muted">View the students connected to your teaching load.</p>
                     </div>
                 </div>
             </div>
@@ -43,7 +43,10 @@
                         <p class="text-muted mb-0">No winner selected yet.</p>
                     {% endif %}
                 </div>
-                <a href="{% url 'article_list' %}" class="btn btn-outline-primary">Review Articles</a>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'teacher_students' %}" class="btn btn-primary">View Students</a>
+                    <a href="{% url 'article_list' %}" class="btn btn-outline-primary">Review Articles</a>
+                </div>
             </div>
         </div>
 

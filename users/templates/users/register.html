@@ -41,7 +41,7 @@
                         <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
                     {% endfor %}
                 {% endif %}
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger">{{ form.non_field_errors }}</div>
@@ -77,6 +77,20 @@
                         {{ form.address }}
                         {% if form.address.errors %}
                             <div class="text-danger small mt-1">{{ form.address.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.profile_image.id_for_label }}" class="form-label">Profile Photo <span class="text-muted">(Optional)</span></label>
+                        {{ form.profile_image }}
+                        {% if form.profile_image.errors %}
+                            <div class="text-danger small mt-1">{{ form.profile_image.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.gender.id_for_label }}" class="form-label">Gender <span class="text-muted">(Optional)</span></label>
+                        {{ form.gender }}
+                        {% if form.gender.errors %}
+                            <div class="text-danger small mt-1">{{ form.gender.errors }}</div>
                         {% endif %}
                     </div>
                     <div class="mb-3">
