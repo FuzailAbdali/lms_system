@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LMS{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(180deg, #eef4fb 0%, #f7f9fc 100%);
+            color: #122033;
+        }
+        .topbar {
+            background: #ffffff;
+            border-bottom: 1px solid #e7edf5;
+            box-shadow: 0 8px 24px rgba(18, 32, 51, 0.04);
+        }
+        .dashboard-shell {
+            min-height: calc(100vh - 81px);
+        }
+        .sidebar-card,
+        .content-card,
+        .stat-card {
+            border: 0;
+            border-radius: 1rem;
+            box-shadow: 0 14px 36px rgba(18, 32, 51, 0.08);
+        }
+        .sidebar-card {
+            position: sticky;
+            top: 1.5rem;
+        }
+        .brand-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            color: #fff;
+            font-weight: 700;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1rem;
+            border-radius: 0.9rem;
+            color: #30455f;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background: #eef4ff;
+            color: #0a58ca;
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(13, 110, 253, 0.22);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg topbar">
+        <div class="container-fluid px-4 px-lg-5">
+            <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center gap-3 mb-0">
+                <span class="brand-chip">L</span>
+                <span class="fw-semibold">LMS Project</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="fw-semibold small">{{ request.user.get_full_name|default:request.user.username }}</div>
+                    <div class="text-muted small">{{ request.user.get_role_display }}</div>
+                </div>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 px-lg-5 py-4 dashboard-shell">
+        <div class="row g-4">
+            <div class="col-lg-3 col-xl-2">
+                <div class="card sidebar-card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <span class="brand-chip">L</span>
+                            <div>
+                                <h1 class="h5 mb-0">LMS Panel</h1>
+                                <small class="text-muted">{{ request.user.get_role_display }}</small>
+                            </div>
+                        </div>
+                        <p class="mb-1 fw-semibold">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p class="text-muted small mb-4">{{ request.user.email }}</p>
+                        <p class="text-uppercase text-muted small fw-semibold mb-3">Navigation</p>
+                        <div class="d-grid gap-2">
+                            {% if request.user.is_superuser or request.user.role == "admin" %}
+                                <a href="{% url 'admin_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}">Dashboard</a>
+                            {% elif request.user.role == "teacher" %}
+                                <a href="{% url 'teacher_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'teacher_dashboard' %} active{% endif %}">Dashboard</a>
+                            {% elif request.user.role == "student" %}
+                                <a href="{% url 'student_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'student_dashboard' %} active{% endif %}">Dashboard</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-xl-10">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

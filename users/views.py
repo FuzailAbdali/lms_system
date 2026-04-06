@@ -1,9 +1,9 @@
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render
 
 from .forms import UserLoginForm, UserRegistrationForm
+from .decorators import role_required
+from .models import User
 
 
 def redirect_user_by_role(user):
@@ -50,22 +50,32 @@ def logout_view(request):
     return redirect("login")
 
 
-@login_required
 def admin_dashboard(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
     if not (request.user.is_superuser or request.user.is_admin()):
-        return HttpResponseForbidden("You do not have access to this dashboard.")
-    return render(request, "users/dashboard.html", {"title": "Admin Dashboard"})
+        return redirect("login")
+    context = {
+        "title": "Admin Dashboard",
+        "total_users": User.objects.count(),
+        "total_courses": 0,
+    }
+    return render(request, "users/admin_dashboard.html", context)
 
 
-@login_required
+@role_required(User.Role.TEACHER)
 def teacher_dashboard(request):
-    if not request.user.is_teacher():
-        return HttpResponseForbidden("You do not have access to this dashboard.")
-    return render(request, "users/dashboard.html", {"title": "Teacher Dashboard"})
+    context = {
+        "title": "Teacher Dashboard",
+    }
+    return render(request, "users/teacher_dashboard.html", context)
 
 
-@login_required
+@role_required(User.Role.STUDENT)
 def student_dashboard(request):
-    if not request.user.is_student():
-        return HttpResponseForbidden("You do not have access to this dashboard.")
-    return render(request, "users/dashboard.html", {"title": "Student Dashboard"})
+    context = {
+        "title": "Student Dashboard",
+        "enrolled_courses": [],
+        "enrolled_courses_count": 0,
+    }
+    return render(request, "users/student_dashboard.html", context)

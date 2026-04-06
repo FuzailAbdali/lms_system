@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="card content-card">
+    <div class="card-body p-4">
+        <h2 class="h3 mb-2">Teacher Dashboard</h2>
+        <p class="text-muted">Welcome back, {{ request.user.first_name|default:request.user.username }}.</p>
+        <div class="row g-4 mt-1">
+            <div class="col-md-6">
+                <div class="card stat-card h-100">
+                    <div class="card-body p-4">
+                        <h3 class="h5">Teaching Overview</h3>
+                        <p class="mb-0 text-muted">This section is ready for your course list, lesson planning, and student progress widgets.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card stat-card h-100">
+                    <div class="card-body p-4">
+                        <h3 class="h5">Quick Actions</h3>
+                        <p class="mb-0 text-muted">You can later connect this area to create lessons, upload materials, and manage assignments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
