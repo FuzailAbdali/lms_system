@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout
 from django.db.models import Count, Prefetch
 from django.shortcuts import redirect, render
 
+from articles.models import Article
 from courses.models import Course, Enrollment
 from .forms import EmailVerificationForm, UserLoginForm, UserRegistrationForm
 from .decorators import role_required
@@ -140,6 +141,7 @@ def admin_dashboard(request):
         "total_users": User.objects.count(),
         "total_courses": Course.objects.count(),
         "total_enrollments": Enrollment.objects.count(),
+        "winner_article": Article.objects.select_related("student").filter(is_winner=True).first(),
         "admin_courses": admin_courses,
     }
     return render(request, "users/admin_dashboard.html", context)
@@ -158,6 +160,7 @@ def teacher_dashboard(request):
         "title": "Teacher Dashboard",
         "teacher_courses": teacher_courses,
         "total_teacher_enrollments": total_teacher_enrollments,
+        "winner_article": Article.objects.select_related("student").filter(is_winner=True).first(),
     }
     return render(request, "users/teacher_dashboard.html", context)
 
@@ -169,5 +172,6 @@ def student_dashboard(request):
         "title": "Student Dashboard",
         "enrolled_courses": enrolled_courses,
         "enrolled_courses_count": enrolled_courses.count(),
+        "winner_article": Article.objects.select_related("student").filter(is_winner=True).first(),
     }
     return render(request, "users/student_dashboard.html", context)

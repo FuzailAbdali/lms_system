@@ -100,14 +100,17 @@
                                 <a href="{% url 'admin_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}">Dashboard</a>
                                 <a href="{% url 'course_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'course_list' %} active{% endif %}">Courses</a>
                                 <a href="{% url 'enrollment_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'enrollment_list' or request.resolver_match.url_name == 'remove_enrollment' %} active{% endif %}">Enrollments</a>
+                                <a href="{% url 'article_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'article_list' or request.resolver_match.url_name == 'article_approve' or request.resolver_match.url_name == 'article_mark_winner' %} active{% endif %}">Articles</a>
                             {% elif request.user.role == "teacher" %}
                                 <a href="{% url 'teacher_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'teacher_dashboard' %} active{% endif %}">Dashboard</a>
                                 <a href="{% url 'course_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'course_list' or request.resolver_match.url_name == 'teacher_course_create' or request.resolver_match.url_name == 'teacher_course_update' or request.resolver_match.url_name == 'teacher_course_delete' %} active{% endif %}">Courses</a>
                                 <a href="{% url 'enrollment_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'enrollment_list' or request.resolver_match.url_name == 'remove_enrollment' %} active{% endif %}">Enrollments</a>
+                                <a href="{% url 'article_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'article_list' or request.resolver_match.url_name == 'article_approve' %} active{% endif %}">Articles</a>
                             {% elif request.user.role == "student" %}
                                 <a href="{% url 'student_dashboard' %}" class="sidebar-link{% if request.resolver_match.url_name == 'student_dashboard' %} active{% endif %}">Dashboard</a>
                                 <a href="{% url 'course_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'course_list' %} active{% endif %}">Courses</a>
                                 <a href="{% url 'enrollment_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'enrollment_list' or request.resolver_match.url_name == 'remove_enrollment' %} active{% endif %}">Enrollments</a>
+                                <a href="{% url 'article_list' %}" class="sidebar-link{% if request.resolver_match.url_name == 'article_list' or request.resolver_match.url_name == 'article_create' or request.resolver_match.url_name == 'article_update' or request.resolver_match.url_name == 'article_delete' %} active{% endif %}">Articles</a>
                             {% endif %}
                         </div>
                     </div>
