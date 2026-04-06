@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Quiz{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h2 class="h3 mb-2">Manage Quiz</h2>
+            <p class="text-muted mb-0">Chapter: {{ chapter.title }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if quiz %}
+                <a href="{% url 'quiz_update' course.pk chapter.pk %}" class="btn btn-outline-primary">Edit Quiz</a>
+                <a href="{% url 'quiz_delete' course.pk chapter.pk %}" class="btn btn-outline-danger">Delete Quiz</a>
+                <a href="{% url 'question_create' course.pk chapter.pk %}" class="btn btn-primary">Add Question</a>
+            {% else %}
+                <a href="{% url 'quiz_create' course.pk chapter.pk %}" class="btn btn-primary">Create Quiz</a>
+            {% endif %}
+            <a href="{% url 'chapter_list' course.pk %}" class="btn btn-outline-secondary">Back To Chapters</a>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+{% if quiz %}
+    <div class="card stat-card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <h3 class="h5 mb-1">{{ quiz.title }}</h3>
+                    <p class="text-muted mb-0">{{ quiz.description|default:"No quiz description added yet." }}</p>
+                </div>
+                <span class="badge text-bg-dark">{{ quiz.questions.count }} question{{ quiz.questions.count|pluralize }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card stat-card">
+        <div class="card-body p-4">
+            <h3 class="h5 mb-3">Questions</h3>
+            {% if quiz.questions.all %}
+                <div class="row g-4">
+                    {% for question in quiz.questions.all %}
+                        <div class="col-12">
+                            <div class="border rounded-4 p-4 bg-light-subtle">
+                                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-3">
+                                    <div>
+                                        <p class="text-muted mb-1">Question {{ question.order }}</p>
+                                        <h4 class="h5 mb-0">{{ question.text }}</h4>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'answer_create' course.pk chapter.pk question.pk %}" class="btn btn-outline-secondary btn-sm">Add Answer</a>
+                                        <a href="{% url 'question_update' course.pk chapter.pk question.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                                        <a href="{% url 'question_delete' course.pk chapter.pk question.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                                    </div>
+                                </div>
+
+                                {% if question.answers.all %}
+                                    <ul class="list-group list-group-flush">
+                                        {% for answer in question.answers.all %}
+                                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center gap-3">
+                                                <div>
+                                                    {{ answer.text }}
+                                                    {% if answer.is_correct %}
+                                                        <span class="badge text-bg-success ms-2">Correct</span>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <a href="{% url 'answer_update' course.pk chapter.pk question.pk answer.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                                                    <a href="{% url 'answer_delete' course.pk chapter.pk question.pk answer.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="mb-0 text-muted">No answers added yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="mb-0 text-muted">No questions added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    <div class="card stat-card">
+        <div class="card-body p-4">
+            <p class="mb-0 text-muted">This chapter does not have a quiz yet.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

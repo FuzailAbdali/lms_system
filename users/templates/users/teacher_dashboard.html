@@ -13,7 +13,7 @@
             <a href="{% url 'teacher_course_create' %}" class="btn btn-primary">Create Course</a>
         </div>
         <div class="row g-4 mt-1">
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="card stat-card h-100">
                     <div class="card-body p-4">
                         <h3 class="h5">Your Courses</h3>
@@ -21,12 +21,30 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <div class="card stat-card h-100">
                     <div class="card-body p-4">
                         <h3 class="h5">Students In Your Courses</h3>
                         <p class="display-6 mb-0">{{ teacher_students_count }}</p>
                         <p class="mb-0 text-muted">View the students connected to your teaching load.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body p-4">
+                        <h3 class="h5">Quiz Attempts</h3>
+                        <p class="display-6 mb-0">{{ total_quiz_attempts }}</p>
+                        <p class="mb-0 text-muted">Overall student submissions across your chapter quizzes.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body p-4">
+                        <h3 class="h5">Answers Review</h3>
+                        <p class="mb-1"><strong>{{ total_correct_answers }}</strong> correct</p>
+                        <p class="mb-0"><strong>{{ total_wrong_answers }}</strong> wrong</p>
                     </div>
                 </div>
             </div>
@@ -76,7 +94,26 @@
                                         </div>
                                     </div>
 
-                                    <p class="mb-0 text-muted">Use the enrollment section to review and remove students from this course.</p>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <div class="border rounded-3 p-3 bg-white">
+                                                <p class="text-uppercase text-muted small fw-semibold mb-1">Attempts</p>
+                                                <p class="h4 mb-0">{{ course.quiz_attempts_count }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="border rounded-3 p-3 bg-white">
+                                                <p class="text-uppercase text-muted small fw-semibold mb-1">Correct Answers</p>
+                                                <p class="h4 mb-0 text-success">{{ course.correct_answers_count }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="border rounded-3 p-3 bg-white">
+                                                <p class="text-uppercase text-muted small fw-semibold mb-1">Wrong Answers</p>
+                                                <p class="h4 mb-0 text-danger">{{ course.wrong_answers_count }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         {% endfor %}

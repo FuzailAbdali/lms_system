@@ -44,6 +44,8 @@ def chapter_list(request, course_pk):
 
 @login_required
 def chapter_detail(request, course_pk, pk):
+    from quizzes.models import QuizAttempt
+
     course = get_object_or_404(Course, pk=course_pk)
     chapter = get_object_or_404(Chapter, pk=pk, course=course)
     chapters = list(course.chapters.all())
@@ -51,6 +53,10 @@ def chapter_detail(request, course_pk, pk):
     previous_chapter = chapters[current_index - 1] if current_index is not None and current_index > 0 else None
     next_chapter = chapters[current_index + 1] if current_index is not None and current_index < len(chapters) - 1 else None
     can_manage_chapters = request.user.role == User.Role.TEACHER and course.teacher_id == request.user.id
+    has_quiz = hasattr(chapter, "quiz")
+    has_attempted_quiz = False
+    if has_quiz and request.user.role == User.Role.STUDENT:
+        has_attempted_quiz = QuizAttempt.objects.filter(quiz=chapter.quiz, student=request.user).exists()
 
     context = {
         "title": chapter.title,
@@ -59,6 +65,8 @@ def chapter_detail(request, course_pk, pk):
         "previous_chapter": previous_chapter,
         "next_chapter": next_chapter,
         "can_manage_chapters": can_manage_chapters,
+        "has_quiz": has_quiz,
+        "has_attempted_quiz": has_attempted_quiz,
     }
     return render(request, "courses/chapter_detail.html", context)
 

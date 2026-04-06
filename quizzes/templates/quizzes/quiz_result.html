@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quiz.title }} Result{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Quiz Result</p>
+            <h2 class="h3 mb-1">{{ quiz.title }}</h2>
+            <p class="text-muted mb-0">{{ course.title }} | {{ chapter.title }}</p>
+        </div>
+        <a href="{% url 'chapter_detail' course.pk chapter.pk %}" class="btn btn-outline-secondary">Back to Chapter</a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <p class="text-uppercase text-muted small fw-semibold mb-2">Score</p>
+                <h3 class="display-6 mb-1">{{ attempt.score }} / {{ attempt.total_questions }}</h3>
+                <p class="text-muted mb-0">Submitted on {{ attempt.submitted_at|date:"M d, Y h:i A" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <p class="text-uppercase text-muted small fw-semibold mb-2">Status</p>
+                <h3 class="h4 mb-2">
+                    {% if attempt.score == attempt.total_questions %}
+                        Excellent work
+                    {% elif attempt.score > 0 %}
+                        Quiz completed
+                    {% else %}
+                        Keep practicing
+                    {% endif %}
+                </h3>
+                <p class="text-muted mb-0">This quiz currently allows only one attempt per student.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card stat-card">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Answer Review</p>
+                <h3 class="h5 mb-0">Submitted Responses</h3>
+            </div>
+        </div>
+        <div class="d-grid gap-3">
+            {% for item in attempt.attempt_answers.all %}
+                <div class="border rounded-3 p-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between gap-2 mb-2">
+                        <strong>Question {{ item.question.order }}: {{ item.question.text }}</strong>
+                        {% if item.is_correct %}
+                            <span class="badge text-bg-success align-self-start">Correct</span>
+                        {% else %}
+                            <span class="badge text-bg-danger align-self-start">Incorrect</span>
+                        {% endif %}
+                    </div>
+                    <p class="mb-1">
+                        <span class="text-muted">Your answer:</span>
+                        {{ item.selected_answer.text|default:"No answer selected" }}
+                    </p>
+                    {% for answer in item.question.answers.all %}
+                        {% if answer.is_correct %}
+                            <p class="mb-0">
+                                <span class="text-muted">Correct answer:</span>
+                                {{ answer.text }}
+                            </p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% empty %}
+                <p class="text-muted mb-0">No submitted answers found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

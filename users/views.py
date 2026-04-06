@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from articles.models import Article
@@ -175,12 +175,29 @@ def teacher_dashboard(request):
             "enrollments",
             queryset=Enrollment.objects.select_related("student").order_by("-enrolled_at"),
         )
-    ).annotate(total_enrollments=Count("enrollments"))
+    ).annotate(
+        total_enrollments=Count("enrollments"),
+        quiz_attempts_count=Count("chapters__quiz__attempts", distinct=True),
+        correct_answers_count=Count(
+            "chapters__quiz__attempts__attempt_answers",
+            filter=Q(chapters__quiz__attempts__attempt_answers__is_correct=True),
+        ),
+        wrong_answers_count=Count(
+            "chapters__quiz__attempts__attempt_answers",
+            filter=Q(chapters__quiz__attempts__attempt_answers__is_correct=False),
+        ),
+    )
     total_teacher_enrollments = sum(course.total_enrollments for course in teacher_courses)
+    total_quiz_attempts = sum(course.quiz_attempts_count for course in teacher_courses)
+    total_correct_answers = sum(course.correct_answers_count for course in teacher_courses)
+    total_wrong_answers = sum(course.wrong_answers_count for course in teacher_courses)
     context = {
         "title": "Teacher Dashboard",
         "teacher_courses": teacher_courses,
         "total_teacher_enrollments": total_teacher_enrollments,
+        "total_quiz_attempts": total_quiz_attempts,
+        "total_correct_answers": total_correct_answers,
+        "total_wrong_answers": total_wrong_answers,
         "winner_article": Article.objects.select_related("student").filter(is_winner=True).first(),
         "teacher_students_count": User.objects.filter(
             enrollments__course__teacher=request.user,

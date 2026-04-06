@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Answer{% endblock %}
+
+{% block content %}
+<div class="card content-card">
+    <div class="card-body p-4 p-lg-5">
+        <h2 class="h3 mb-3">Delete Answer</h2>
+        <p class="text-muted">Are you sure you want to delete this answer?</p>
+        <form method="post" class="d-flex gap-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete Answer</button>
+            <a href="{% url 'quiz_manage' course.pk chapter.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Quiz{% endblock %}
+
+{% block content %}
+<div class="card content-card">
+    <div class="card-body p-4 p-lg-5">
+        <h2 class="h3 mb-3">Delete Quiz</h2>
+        <p class="text-muted">
+            Are you sure you want to delete <strong>{{ quiz.title }}</strong> from <strong>{{ chapter.title }}</strong>?
+            All questions and answers inside this quiz will also be removed.
+        </p>
+        <form method="post" class="d-flex gap-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete Quiz</button>
+            <a href="{% url 'quiz_manage' course.pk chapter.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

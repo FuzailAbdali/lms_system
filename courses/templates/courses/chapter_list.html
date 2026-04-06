@@ -47,11 +47,15 @@
                                     <a href="{% url 'chapter_detail' course.pk chapter.pk %}" class="text-decoration-none fw-semibold">
                                         {{ chapter.title }}
                                     </a>
+                                    {% if chapter.quiz %}
+                                        <span class="badge text-bg-dark ms-2">Quiz Ready</span>
+                                    {% endif %}
                                 </td>
                                 <td class="text-muted">{{ chapter.content|truncatewords:18 }}</td>
                                 {% if can_manage_chapters %}
                                     <td class="text-end">
                                         <a href="{% url 'chapter_detail' course.pk chapter.pk %}" class="btn btn-outline-secondary btn-sm">View</a>
+                                        <a href="{% url 'quiz_manage' course.pk chapter.pk %}" class="btn btn-outline-dark btn-sm">Quiz</a>
                                         <a href="{% url 'teacher_chapter_update' course.pk chapter.pk %}" class="btn btn-outline-primary btn-sm">Edit</a>
                                         <a href="{% url 'teacher_chapter_delete' course.pk chapter.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
                                     </td>
