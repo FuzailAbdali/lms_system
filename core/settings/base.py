@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 load_dotenv()
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'courses',
     'articles',
     'quizzes',
+    'livestreams',
 ]
 
 MIDDLEWARE = [
@@ -138,6 +140,35 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+YOUTUBE_CLIENT_SECRET_FILE = os.getenv("YOUTUBE_CLIENT_SECRET_FILE", str(BASE_DIR / "client_secret.json"))
+YOUTUBE_TOKEN_FILE = os.getenv("YOUTUBE_TOKEN_FILE", str(BASE_DIR / "youtube_token.json"))
+YOUTUBE_API_SERVICE_NAME = "youtube"
+YOUTUBE_API_VERSION = "v3"
+YOUTUBE_API_SCOPES = [
+    "https://www.googleapis.com/auth/youtube",
+]
+YOUTUBE_REDIRECT_URI = os.getenv("YOUTUBE_REDIRECT_URI", "http://127.0.0.1:8000/auth/youtube/callback")
+YOUTUBE_ALLOW_INSECURE_TRANSPORT = os.getenv("YOUTUBE_ALLOW_INSECURE_TRANSPORT", "True").lower() == "true"
+FFMPEG_BINARY = os.getenv("FFMPEG_BINARY", "ffmpeg")
+FFMPEG_LOG_DIR = os.getenv("FFMPEG_LOG_DIR", str(BASE_DIR / "media" / "ffmpeg_logs"))
+FFMPEG_BROWSER_INPUT_FORMAT = os.getenv("FFMPEG_BROWSER_INPUT_FORMAT", "webm")
+LIVESTREAM_PIPE_DIR = os.getenv("LIVESTREAM_PIPE_DIR", str(BASE_DIR / "media" / "livestream_pipes"))
+LIVESTREAM_PACKET_HEALTHY_SECONDS = int(os.getenv("LIVESTREAM_PACKET_HEALTHY_SECONDS", "3"))
+LIVESTREAM_PACKET_STALE_SECONDS = int(os.getenv("LIVESTREAM_PACKET_STALE_SECONDS", "8"))
+LIVESTREAM_WORKER_POLL_INTERVAL = float(os.getenv("LIVESTREAM_WORKER_POLL_INTERVAL", "1.0"))
+LIVESTREAM_WORKER_PID_FILE = os.getenv("LIVESTREAM_WORKER_PID_FILE", str(BASE_DIR / "media" / "livestream_worker.pid"))
+LIVESTREAM_WORKER_LOG_FILE = os.getenv("LIVESTREAM_WORKER_LOG_FILE", str(BASE_DIR / "media" / "livestream_worker.log"))
+LIVESTREAM_WORKER_PYTHON = os.getenv("LIVESTREAM_WORKER_PYTHON", sys.executable or "python3")
+FFMPEG_VIDEO_PRESET = os.getenv("FFMPEG_VIDEO_PRESET", "veryfast")
+FFMPEG_GOP_SIZE = int(os.getenv("FFMPEG_GOP_SIZE", "60"))
+FFMPEG_OUTPUT_FRAME_RATE = int(os.getenv("FFMPEG_OUTPUT_FRAME_RATE", "30"))
+FFMPEG_VIDEO_BITRATE = os.getenv("FFMPEG_VIDEO_BITRATE", "2500k")
+FFMPEG_MAX_VIDEO_BITRATE = os.getenv("FFMPEG_MAX_VIDEO_BITRATE", "3000k")
+FFMPEG_BUFFER_SIZE = os.getenv("FFMPEG_BUFFER_SIZE", "6000k")
+FFMPEG_AUDIO_BITRATE = os.getenv("FFMPEG_AUDIO_BITRATE", "128k")
+
+if YOUTUBE_ALLOW_INSECURE_TRANSPORT:
+    os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
 
 EMAIL_HOST = os.getenv("EMAIL_HOST", "")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))

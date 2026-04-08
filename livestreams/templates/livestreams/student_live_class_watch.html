@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} Live Class{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Live Classroom</p>
+            <h2 class="h3 mb-1">{{ course.title }}</h2>
+            <p class="text-muted mb-0">Teacher: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
+        </div>
+        <a href="{% url 'course_list' %}" class="btn btn-outline-secondary">Back to Courses</a>
+    </div>
+</div>
+
+{% if session %}
+    <div class="card stat-card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
+                <div>
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Now Live</p>
+                    <h3 class="h4 mb-1">{{ session.title }}</h3>
+                    <p class="text-muted mb-0">Join the class directly below.</p>
+                </div>
+                <a href="{{ session.watch_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">Open on YouTube</a>
+            </div>
+
+            <div class="ratio ratio-16x9 rounded-4 overflow-hidden">
+                <iframe
+                    src="https://www.youtube.com/embed/{{ session.youtube_broadcast_id }}"
+                    title="{{ session.title }}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="card stat-card">
+        <div class="card-body p-4">
+            <p class="text-uppercase text-muted small fw-semibold mb-1">No Active Stream</p>
+            <h3 class="h5 mb-2">There is no live class running right now.</h3>
+            <p class="text-muted mb-0">Please check back later or refresh this page when your teacher starts the next session.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

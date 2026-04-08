@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from articles.models import Article
 from courses.models import Course, Enrollment
+from livestreams.models import LiveStreamSession
 from .forms import (
     AdminManagedUserForm,
     EmailVerificationForm,
@@ -164,6 +165,10 @@ def admin_dashboard(request):
         "total_enrollments": Enrollment.objects.count(),
         "winner_article": Article.objects.select_related("student").filter(is_winner=True).first(),
         "admin_courses": admin_courses,
+        "active_live_sessions": LiveStreamSession.objects.filter(is_live=True)
+        .select_related("teacher", "course")
+        .order_by("-created_at"),
+        "recent_live_sessions": LiveStreamSession.objects.select_related("teacher", "course").order_by("-created_at")[:8],
     }
     return render(request, "users/admin_dashboard.html", context)
 
@@ -191,6 +196,8 @@ def teacher_dashboard(request):
     total_quiz_attempts = sum(course.quiz_attempts_count for course in teacher_courses)
     total_correct_answers = sum(course.correct_answers_count for course in teacher_courses)
     total_wrong_answers = sum(course.wrong_answers_count for course in teacher_courses)
+    teacher_live_sessions = LiveStreamSession.objects.filter(teacher=request.user).select_related("course").order_by("-created_at")
+    active_teacher_live_session = teacher_live_sessions.filter(is_live=True).first()
     context = {
         "title": "Teacher Dashboard",
         "teacher_courses": teacher_courses,
@@ -203,6 +210,9 @@ def teacher_dashboard(request):
             enrollments__course__teacher=request.user,
             role=User.Role.STUDENT,
         ).distinct().count(),
+        "active_teacher_live_session": active_teacher_live_session,
+        "teacher_live_sessions": teacher_live_sessions[:6],
+        "teacher_live_sessions_count": teacher_live_sessions.count(),
     }
     return render(request, "users/teacher_dashboard.html", context)
 
@@ -210,11 +220,25 @@ def teacher_dashboard(request):
 @role_required(User.Role.STUDENT)
 def student_dashboard(request):
     enrolled_courses = Course.objects.filter(enrollments__student=request.user).select_related("teacher")
+    active_student_live_sessions = (
+        LiveStreamSession.objects.filter(course__enrollments__student=request.user, is_live=True)
+        .select_related("teacher", "course")
+        .order_by("-created_at")
+        .distinct()
+    )
+    recent_student_live_sessions = (
+        LiveStreamSession.objects.filter(course__enrollments__student=request.user)
+        .select_related("teacher", "course")
+        .order_by("-created_at")
+        .distinct()[:6]
+    )
     context = {
         "title": "Student Dashboard",
         "enrolled_courses": enrolled_courses,
         "enrolled_courses_count": enrolled_courses.count(),
         "winner_article": Article.objects.select_related("student").filter(is_winner=True).first(),
+        "active_student_live_sessions": active_student_live_sessions,
+        "recent_student_live_sessions": recent_student_live_sessions,
     }
     return render(request, "users/student_dashboard.html", context)
 

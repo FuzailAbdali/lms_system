@@ -1,4 +1,7 @@
 Django==5.2.12
+google-api-python-client==2.170.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.2
 mysqlclient==2.2.8
 Pillow==12.2.0
 python-dotenv==1.2.2

@@ -1,0 +1,621 @@
+{% extends "base.html" %}
+
+{% block title %}{{ session.title }} Studio{% endblock %}
+
+{% block extra_css %}
+<style>
+    .studio-shell {
+        display: grid;
+        gap: 1.5rem;
+    }
+    .studio-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+    }
+    .studio-stage {
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at top left, rgba(12, 183, 106, 0.28), transparent 36%),
+            radial-gradient(circle at bottom right, rgba(10, 88, 202, 0.22), transparent 38%),
+            linear-gradient(160deg, #08111f 0%, #10233d 100%);
+        min-height: 28rem;
+    }
+    .studio-video {
+        width: 100%;
+        height: 100%;
+        min-height: 28rem;
+        object-fit: cover;
+        background: rgba(4, 12, 24, 0.92);
+    }
+    .studio-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.25rem;
+        pointer-events: none;
+    }
+    .studio-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.85rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        font-size: 0.78rem;
+    }
+    .studio-dot {
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 999px;
+        background: #ffc107;
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.45);
+    }
+    .studio-dot.live {
+        background: #ff4d5a;
+        animation: pulse-live 1.5s infinite;
+    }
+    .studio-meta {
+        max-width: 30rem;
+        padding: 1rem 1.1rem;
+        border-radius: 1rem;
+        background: rgba(5, 15, 28, 0.55);
+        backdrop-filter: blur(10px);
+        color: #f7fbff;
+    }
+    .studio-panel {
+        border: 0;
+        border-radius: 1rem;
+        box-shadow: 0 14px 36px rgba(18, 32, 51, 0.08);
+        background: #ffffff;
+    }
+    .studio-stat {
+        display: grid;
+        gap: 0.25rem;
+        padding: 1rem;
+        border-radius: 0.9rem;
+        background: #f7faff;
+        border: 1px solid #e5edf8;
+    }
+    .studio-stat-label {
+        color: #60748a;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 700;
+    }
+    .studio-stat-value {
+        color: #122033;
+        font-size: 1.05rem;
+        font-weight: 700;
+        word-break: break-word;
+    }
+    .studio-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .studio-status {
+        min-height: 3rem;
+        border-radius: 0.9rem;
+        background: #f7faff;
+        border: 1px solid #e5edf8;
+        padding: 0.9rem 1rem;
+        color: #30455f;
+        font-weight: 500;
+    }
+    .studio-checklist {
+        display: grid;
+        gap: 0.75rem;
+        padding-left: 0;
+        margin: 0;
+        list-style: none;
+    }
+    .studio-checklist li {
+        padding: 0.9rem 1rem;
+        border-radius: 0.9rem;
+        background: #f7faff;
+        border: 1px solid #e5edf8;
+    }
+    @keyframes pulse-live {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 77, 90, 0.45);
+        }
+        70% {
+            box-shadow: 0 0 0 12px rgba(255, 77, 90, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 77, 90, 0);
+        }
+    }
+    @media (max-width: 991.98px) {
+        .studio-grid {
+            grid-template-columns: 1fr;
+        }
+        .studio-stage,
+        .studio-video {
+            min-height: 22rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="studio-shell">
+    <div class="card content-card">
+        <div class="card-body p-4 p-lg-5">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Browser Camera Studio</p>
+                    <h2 class="h3 mb-2">{{ session.title }}</h2>
+                    <p class="text-muted mb-0">{{ session.course.title }}. Use your camera in the browser, preview the stream, then start the live capture session.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'live_class_detail' session.pk %}" class="btn btn-outline-secondary">Back To Details</a>
+                    <a href="{{ session.watch_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open YouTube Watch Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="studio-grid">
+        <div class="card studio-panel studio-stage">
+            <video id="cameraPreview" class="studio-video" autoplay muted playsinline></video>
+            <div class="studio-overlay">
+                <div class="studio-badge">
+                    <span id="studioDot" class="studio-dot"></span>
+                    <span id="studioBadgeLabel">Camera initializing</span>
+                </div>
+                <div class="studio-meta">
+                    <div class="fw-semibold mb-2">Live preview</div>
+                    <div id="studioMetaText" class="small text-white-50">Requesting camera permission so the teacher can see a real-time preview before going live.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card studio-panel">
+            <div class="card-body p-4">
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Studio Controls</p>
+                <h3 class="h5 mb-3">Camera And Stream State</h3>
+
+                <div class="studio-actions mb-3">
+                    <button id="requestCameraBtn" type="button" class="btn btn-outline-primary">Enable Camera</button>
+                    <button id="startStreamBtn" type="button" class="btn btn-success" disabled>Start Streaming</button>
+                    <button id="stopStreamBtn" type="button" class="btn btn-outline-danger" disabled>Stop</button>
+                </div>
+                <input id="csrfTokenValue" type="hidden" value="{{ csrf_token }}">
+
+                <div id="studioStatus" class="studio-status mb-4">
+                    Waiting for camera permission.
+                </div>
+                {% if ffmpeg_last_error %}
+                    <div class="alert alert-danger small mb-4">
+                        Last FFmpeg error: {{ ffmpeg_last_error }}
+                    </div>
+                {% endif %}
+
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <div class="studio-stat">
+                            <span class="studio-stat-label">Stream State</span>
+                            <span id="streamStateValue" class="studio-stat-value">Idle</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="studio-stat">
+                            <span class="studio-stat-label">Elapsed</span>
+                            <span id="streamTimerValue" class="studio-stat-value">00:00</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="studio-stat">
+                            <span class="studio-stat-label">Packet Health</span>
+                            <span id="packetHealthValue" class="studio-stat-value">{{ session.get_packet_health_display }}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="studio-stat">
+                            <span class="studio-stat-label">Chunks Uploaded</span>
+                            <span id="chunkCountValue" class="studio-stat-value">{{ session.ingest_chunk_count }}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="studio-stat">
+                            <span class="studio-stat-label">Bytes Uploaded</span>
+                            <span id="bytesUploadedValue" class="studio-stat-value">{{ session.ingest_bytes_total }}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="studio-stat">
+                            <span class="studio-stat-label">Worker Heartbeat</span>
+                            <span id="workerHeartbeatValue" class="studio-stat-value">{% if session.worker_heartbeat_at %}Active{% else %}Waiting{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="studio-stat">
+                            <span class="studio-stat-label">Destination</span>
+                            <span class="studio-stat-value">{{ session.rtmp_url }}/{{ session.stream_key }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-uppercase text-muted small fw-semibold mb-3">Before You Go Live</p>
+                <ul class="studio-checklist">
+                    <li>Allow browser access to camera and microphone when prompted.</li>
+                    <li>Check the preview feed and confirm framing before you start streaming.</li>
+                    <li>Starting the stream here records browser camera chunks, uploads them to Django, and Django pipes them into FFmpeg for YouTube RTMP.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (() => {
+        const preview = document.getElementById("cameraPreview");
+        const requestCameraBtn = document.getElementById("requestCameraBtn");
+        const startStreamBtn = document.getElementById("startStreamBtn");
+        const stopStreamBtn = document.getElementById("stopStreamBtn");
+        const studioStatus = document.getElementById("studioStatus");
+        const streamStateValue = document.getElementById("streamStateValue");
+        const streamTimerValue = document.getElementById("streamTimerValue");
+        const studioBadgeLabel = document.getElementById("studioBadgeLabel");
+        const studioMetaText = document.getElementById("studioMetaText");
+        const studioDot = document.getElementById("studioDot");
+        const csrfTokenValue = document.getElementById("csrfTokenValue");
+        const startStreamUrl = "{% url 'live_class_stream_start' session.pk %}";
+        const uploadChunkUrl = "{% url 'live_class_stream_upload' session.pk %}";
+        const stopStreamUrl = "{% url 'live_class_stream_stop' session.pk %}";
+        const statusUrl = "{% url 'live_class_stream_status' session.pk %}";
+        const initialStreamStatus = "{{ ffmpeg_status }}";
+        const sessionStreamKey = "{{ session.stream_key|escapejs }}";
+        const sessionRtmpUrl = "{{ session.rtmp_url|escapejs }}";
+        const packetHealthValue = document.getElementById("packetHealthValue");
+        const chunkCountValue = document.getElementById("chunkCountValue");
+        const bytesUploadedValue = document.getElementById("bytesUploadedValue");
+        const workerHeartbeatValue = document.getElementById("workerHeartbeatValue");
+
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let uploadChain = Promise.resolve();
+        let uploadFailed = false;
+        let streamStartedAt = null;
+        let timerId = null;
+        let statusPollerId = null;
+
+        function setStatus(message, tone = "neutral") {
+            studioStatus.textContent = message;
+            studioStatus.style.borderColor = tone === "error" ? "#f5c2c7" : "#e5edf8";
+            studioStatus.style.background = tone === "error" ? "#fff5f5" : "#f7faff";
+            studioStatus.style.color = tone === "error" ? "#842029" : "#30455f";
+        }
+
+        function formatElapsed(ms) {
+            const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+            const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+            const seconds = String(totalSeconds % 60).padStart(2, "0");
+            return `${minutes}:${seconds}`;
+        }
+
+        function updateTimer() {
+            if (!streamStartedAt) {
+                streamTimerValue.textContent = "00:00";
+                return;
+            }
+            streamTimerValue.textContent = formatElapsed(Date.now() - streamStartedAt);
+        }
+
+        function updateUiForIdle() {
+            streamStateValue.textContent = "Idle";
+            studioBadgeLabel.textContent = "Camera ready";
+            studioMetaText.textContent = "Preview is active. Start the server stream when you are ready to push to YouTube.";
+            studioDot.classList.remove("live");
+            startStreamBtn.disabled = !mediaStream;
+            stopStreamBtn.disabled = true;
+            if (timerId) {
+                window.clearInterval(timerId);
+                timerId = null;
+            }
+            streamStartedAt = null;
+            updateTimer();
+            stopStatusPolling();
+        }
+
+        function updateUiForLive() {
+            streamStateValue.textContent = "Streaming";
+            studioBadgeLabel.textContent = "Browser live";
+            studioMetaText.textContent = "Browser camera chunks are being uploaded to Django and piped into FFmpeg for YouTube RTMP.";
+            studioDot.classList.add("live");
+            startStreamBtn.disabled = true;
+            stopStreamBtn.disabled = false;
+            streamStartedAt = Date.now();
+            updateTimer();
+            timerId = window.setInterval(updateTimer, 1000);
+            startStatusPolling();
+        }
+
+        function sleep(ms) {
+            return new Promise((resolve) => window.setTimeout(resolve, ms));
+        }
+
+        function updateStatusCards(payload) {
+            streamStateValue.textContent = payload.status || "Idle";
+            packetHealthValue.textContent = payload.packet_health || "Unknown";
+            chunkCountValue.textContent = String(payload.ingest_chunk_count ?? 0);
+            bytesUploadedValue.textContent = String(payload.ingest_bytes_total ?? 0);
+            workerHeartbeatValue.textContent = payload.worker_heartbeat_at ? "Active" : "Waiting";
+            if (payload.ffmpeg_last_error) {
+                setStatus(`Worker reported: ${payload.ffmpeg_last_error}`, "error");
+            }
+        }
+
+        async function pollStreamStatus() {
+            const response = await fetch(statusUrl, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                throw new Error(payload.error || "Could not load stream status.");
+            }
+            updateStatusCards(payload);
+            if (payload.status === "stopped" || payload.status === "failed") {
+                uploadFailed = true;
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                }
+                mediaRecorder = null;
+                updateUiForIdle();
+            }
+            return payload;
+        }
+
+        function startStatusPolling() {
+            stopStatusPolling();
+            statusPollerId = window.setInterval(() => {
+                pollStreamStatus().catch((error) => {
+                    setStatus(`Status polling failed: ${error.message}`, "error");
+                });
+            }, 2000);
+        }
+
+        function stopStatusPolling() {
+            if (statusPollerId) {
+                window.clearInterval(statusPollerId);
+                statusPollerId = null;
+            }
+        }
+
+        async function waitForWorkerReady(timeoutMs = 12000) {
+            const startedAt = Date.now();
+            while (Date.now() - startedAt < timeoutMs) {
+                const payload = await pollStreamStatus();
+                if (payload.status === "streaming") {
+                    return payload;
+                }
+                if (payload.status === "failed" || payload.status === "stopped") {
+                    throw new Error(payload.ffmpeg_last_error || "The livestream worker could not start the FFmpeg stream.");
+                }
+                await sleep(750);
+            }
+            throw new Error("The livestream worker did not become ready in time.");
+        }
+
+        function getSupportedMimeType() {
+            const preferredTypes = [
+                "video/webm;codecs=vp8,opus",
+                "video/webm;codecs=vp9,opus",
+                "video/webm",
+            ];
+
+            for (const mimeType of preferredTypes) {
+                if (window.MediaRecorder && MediaRecorder.isTypeSupported(mimeType)) {
+                    return mimeType;
+                }
+            }
+            return "";
+        }
+
+        async function uploadChunk(blob) {
+            const chunkBuffer = await blob.arrayBuffer();
+            const response = await fetch(uploadChunkUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/octet-stream",
+                    "X-CSRFToken": csrfTokenValue.value,
+                },
+                body: chunkBuffer,
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                throw new Error(payload.error || "Chunk upload failed.");
+            }
+        }
+
+        async function stopServerStreamRequest() {
+            const response = await fetch(stopStreamUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfTokenValue.value,
+                },
+                body: "{}",
+            });
+            const payload = await response.json();
+            if (!response.ok) {
+                throw new Error(payload.error || "Unknown stop error.");
+            }
+        }
+
+        async function handleStreamingFailure(message) {
+            uploadFailed = true;
+            setStatus(message, "error");
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+            mediaRecorder = null;
+            try {
+                await stopServerStreamRequest();
+            } catch (stopError) {
+                setStatus(`${message} Stop request also failed: ${stopError.message}`, "error");
+                return;
+            }
+            updateUiForIdle();
+        }
+
+        function stopTracks() {
+            if (!mediaStream) {
+                return;
+            }
+            mediaStream.getTracks().forEach((track) => track.stop());
+            mediaStream = null;
+            preview.srcObject = null;
+        }
+
+        async function enableCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                setStatus("This browser does not support camera access.", "error");
+                studioBadgeLabel.textContent = "Unsupported";
+                studioMetaText.textContent = "getUserMedia is not available in this browser.";
+                requestCameraBtn.disabled = true;
+                return;
+            }
+
+            requestCameraBtn.disabled = true;
+            setStatus("Requesting camera and microphone access...");
+
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: "user",
+                    },
+                    audio: true,
+                });
+                preview.srcObject = mediaStream;
+                await preview.play();
+                setStatus("Camera is connected. You can start streaming now.");
+                updateUiForIdle();
+            } catch (error) {
+                requestCameraBtn.disabled = false;
+                setStatus(`Could not access camera: ${error.message}`, "error");
+                studioBadgeLabel.textContent = "Permission needed";
+                studioMetaText.textContent = "Allow camera access in your browser and try again.";
+            }
+        }
+
+        async function startStreaming() {
+            if (!mediaStream) {
+                setStatus("Enable the camera before starting the stream.", "error");
+                return;
+            }
+
+            try {
+                const mimeType = getSupportedMimeType();
+                if (!mimeType) {
+                    throw new Error("This browser does not support a WebM MediaRecorder format required for streaming.");
+                }
+
+                startStreamBtn.disabled = true;
+                uploadFailed = false;
+                uploadChain = Promise.resolve();
+                setStatus("Starting FFmpeg on the server and connecting browser media to YouTube...");
+                const response = await fetch(startStreamUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfTokenValue.value,
+                    },
+                    body: JSON.stringify({
+                        stream_key: sessionStreamKey,
+                        rtmp_url: sessionRtmpUrl,
+                        input_format: "webm",
+                    }),
+                });
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.error || "Unknown streaming error.");
+                }
+                streamStateValue.textContent = payload.status || "starting";
+                setStatus("Worker starting. Waiting for FFmpeg to become ready...");
+                await waitForWorkerReady();
+
+                mediaRecorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
+                mediaRecorder.ondataavailable = (event) => {
+                    if (!event.data || event.data.size === 0 || uploadFailed) {
+                        return;
+                    }
+                    uploadChain = uploadChain
+                        .then(() => uploadChunk(event.data))
+                        .catch(async (error) => {
+                            await handleStreamingFailure(`Chunk upload failed: ${error.message}`);
+                        });
+                };
+                mediaRecorder.onerror = async (event) => {
+                    const message = event.error && event.error.message ? event.error.message : "Unknown recorder error.";
+                    await handleStreamingFailure(`MediaRecorder error: ${message}`);
+                };
+                mediaRecorder.start(1000);
+
+                const workerLabel = payload.worker_pid ? `worker ${payload.worker_pid}` : "the livestream worker";
+                setStatus(`Streaming started. ${workerLabel} is receiving browser camera chunks for YouTube.`);
+                updateUiForLive();
+            } catch (error) {
+                setStatus(`Could not start streaming: ${error.message}`, "error");
+                startStreamBtn.disabled = !mediaStream;
+            }
+        }
+
+        async function stopStreaming() {
+            try {
+                stopStreamBtn.disabled = true;
+                setStatus("Stopping browser ingest and FFmpeg stream...");
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                }
+                mediaRecorder = null;
+                await uploadChain.catch(() => {});
+                await stopServerStreamRequest();
+                uploadFailed = false;
+                setStatus("Streaming stopped. The camera preview is still available.");
+                updateUiForIdle();
+            } catch (error) {
+                setStatus(`Could not stop streaming: ${error.message}`, "error");
+                stopStreamBtn.disabled = false;
+            }
+        }
+
+        requestCameraBtn.addEventListener("click", enableCamera);
+        startStreamBtn.addEventListener("click", startStreaming);
+        stopStreamBtn.addEventListener("click", stopStreaming);
+
+        window.addEventListener("beforeunload", () => {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+            stopStatusPolling();
+            stopTracks();
+        });
+
+        if (initialStreamStatus === "streaming") {
+            updateUiForLive();
+            setStatus("FFmpeg is already streaming for this live session.");
+            pollStreamStatus().catch(() => {});
+        }
+
+        enableCamera();
+    })();
+</script>
+{% endblock %}

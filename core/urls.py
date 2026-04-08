@@ -18,12 +18,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from livestreams.views import youtube_auth_callback, youtube_auth_start
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/youtube/start/', youtube_auth_start, name='youtube_auth_start'),
+    path('auth/youtube/callback', youtube_auth_callback, name='youtube_auth_callback'),
     path('courses/', include('courses.urls')),
     path('articles/', include('articles.urls')),
     path('quizzes/', include('quizzes.urls')),
+    path('live/', include('livestreams.urls')),
     path('', include('users.urls')),
 ]
 

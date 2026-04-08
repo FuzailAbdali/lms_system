@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Live Session History{% endblock %}
+
+{% block content %}
+<div class="card content-card">
+    <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Live Sessions</p>
+                <h2 class="h3 mb-2">Session History</h2>
+                <p class="text-muted mb-0">Review old live sessions, replay them when a YouTube archive exists, or delete history entries you no longer need.</p>
+            </div>
+            <a href="{% url 'live_class_start' %}" class="btn btn-primary">Start New Live Session</a>
+        </div>
+
+        {% if sessions %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Packet Health</th>
+                            <th>Created</th>
+                            <th>Ended</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in sessions %}
+                            <tr>
+                                <td>{{ session.title }}</td>
+                                <td>{{ session.course.title }}</td>
+                                <td>{{ session.get_ffmpeg_status_display }}</td>
+                                <td>{{ session.get_packet_health_display }}</td>
+                                <td>{{ session.created_at|date:"M d, Y h:i A" }}</td>
+                                <td>{% if session.ended_at %}{{ session.ended_at|date:"M d, Y h:i A" }}{% else %}<span class="text-muted">Still active</span>{% endif %}</td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="{% url 'live_class_detail' session.pk %}" class="btn btn-sm btn-outline-secondary">Open</a>
+                                        {% if session.replay_available %}
+                                            <a href="{{ session.watch_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">Play</a>
+                                        {% endif %}
+                                        <form method="post" action="{% url 'live_class_delete' session.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% if session.replay_available %}
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="border rounded-4 p-3 bg-light-subtle">
+                                            <div class="row g-3 align-items-center">
+                                                <div class="col-lg-5">
+                                                    <a href="{{ session.watch_url }}" target="_blank" rel="noopener noreferrer" class="d-block text-decoration-none">
+                                                        <img
+                                                            src="https://i.ytimg.com/vi/{{ session.youtube_broadcast_id }}/hqdefault.jpg"
+                                                            alt="{{ session.title }}"
+                                                            class="img-fluid rounded-4 border"
+                                                        >
+                                                    </a>
+                                                </div>
+                                                <div class="col-lg-7">
+                                                    <p class="text-uppercase text-muted small fw-semibold mb-1">Replay Available</p>
+                                                    <h4 class="h5 mb-2">{{ session.title }}</h4>
+                                                    <p class="text-muted mb-3">Some YouTube videos block embedded playback on local or restricted domains. Open the replay directly on YouTube if the in-app player is unavailable.</p>
+                                                    <a href="{{ session.watch_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open Replay On YouTube</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-light border mb-0">
+                No live session history exists yet.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

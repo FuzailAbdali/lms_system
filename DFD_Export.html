@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMS System DFD Documentation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.45;
+      color: #111;
+      margin: 32px;
+    }
+    h1, h2, h3 {
+      margin-bottom: 8px;
+    }
+    p {
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 28px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+      vertical-align: top;
+      word-wrap: break-word;
+    }
+    th {
+      background: #f0f0f0;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>LMS System Data Flow Diagrams</h1>
+  <p>This document contains portable table-based Data Flow Diagram content for the LMS project, covering Level 0, Level 1, and Level 2.</p>
+
+  <h2>DFD Level 0 (Context Diagram)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>External Entity</th>
+        <th>Input to LMS System</th>
+        <th>Output from LMS System</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Student</td>
+        <td>Registration details, login credentials, course enrollment request, quiz answers, article submission, live class watch request</td>
+        <td>OTP/verification response, login access, enrolled courses, chapter content, quiz result, article status, live class link</td>
+      </tr>
+      <tr>
+        <td>Teacher</td>
+        <td>Login credentials, course data, chapter data, quiz data, article review actions, live class start request</td>
+        <td>Dashboard data, student/enrollment data, quiz management data, stream details</td>
+      </tr>
+      <tr>
+        <td>Admin</td>
+        <td>Login credentials, user approval/block actions, user creation/deletion actions, winner selection</td>
+        <td>Admin dashboard, user lists, course/enrollment summaries, article competition results</td>
+      </tr>
+      <tr>
+        <td>Email Service / SMTP</td>
+        <td>Email delivery status</td>
+        <td>OTP email, password reset email</td>
+      </tr>
+      <tr>
+        <td>YouTube API</td>
+        <td>Stream/broadcast response data</td>
+        <td>Live stream creation request, broadcast creation request</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Central Process</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>LMS System</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>DFD Level 1</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Process No.</th>
+        <th>Process Name</th>
+        <th>Inputs</th>
+        <th>Outputs</th>
+        <th>Data Stores Used</th>
+        <th>External Entities</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1.0</td>
+        <td>User &amp; Access Management</td>
+        <td>Registration data, login data, OTP, profile updates, admin approval/block actions</td>
+        <td>Verified account, login session, updated profile, account approval/block status</td>
+        <td>D1 Users, D10 Session Data</td>
+        <td>Student, Teacher, Admin, Email Service</td>
+      </tr>
+      <tr>
+        <td>2.0</td>
+        <td>Course &amp; Chapter Management</td>
+        <td>Course details, chapter details, course/chapter view request</td>
+        <td>Saved/updated course, saved/updated chapter, course list, chapter content</td>
+        <td>D2 Courses, D3 Chapters</td>
+        <td>Teacher, Student, Admin</td>
+      </tr>
+      <tr>
+        <td>3.0</td>
+        <td>Enrollment Management</td>
+        <td>Enrollment request, enrollment view request, enrollment removal request</td>
+        <td>Enrollment confirmation, enrollment list, removal confirmation</td>
+        <td>D4 Enrollments, D2 Courses, D1 Users</td>
+        <td>Student, Teacher, Admin</td>
+      </tr>
+      <tr>
+        <td>4.0</td>
+        <td>Quiz Management &amp; Attempts</td>
+        <td>Quiz details, question details, answer details, quiz submission, result request</td>
+        <td>Saved quiz, saved questions/answers, saved attempt, score/result</td>
+        <td>D5 Quizzes, D6 Questions &amp; Answers, D7 Quiz Attempts, D3 Chapters</td>
+        <td>Teacher, Student</td>
+      </tr>
+      <tr>
+        <td>5.0</td>
+        <td>Article Competition Management</td>
+        <td>Article submission, edit/delete request, approval request, winner selection</td>
+        <td>Saved article, approval status, winner announcement, article list</td>
+        <td>D8 Articles, D1 Users, D2 Courses</td>
+        <td>Student, Teacher, Admin</td>
+      </tr>
+      <tr>
+        <td>6.0</td>
+        <td>Live Class Management</td>
+        <td>Live class start request, live class detail request, watch request</td>
+        <td>Stream info, RTMP URL, watch URL, active live session</td>
+        <td>D9 Live Stream Sessions, D2 Courses</td>
+        <td>Teacher, Student, YouTube API</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Data Store Definitions</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Data Store No.</th>
+        <th>Data Store Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>D1</td><td>Users</td><td>Stores admin, teacher, and student account details, approval status, role, OTP and profile info</td></tr>
+      <tr><td>D2</td><td>Courses</td><td>Stores course records created by teachers</td></tr>
+      <tr><td>D3</td><td>Chapters</td><td>Stores chapters belonging to courses</td></tr>
+      <tr><td>D4</td><td>Enrollments</td><td>Stores student-course enrollment records</td></tr>
+      <tr><td>D5</td><td>Quizzes</td><td>Stores quiz records linked to chapters</td></tr>
+      <tr><td>D6</td><td>Questions &amp; Answers</td><td>Stores quiz questions and answer options</td></tr>
+      <tr><td>D7</td><td>Quiz Attempts</td><td>Stores student quiz attempts, selected answers, and scores</td></tr>
+      <tr><td>D8</td><td>Articles</td><td>Stores writing competition submissions, approval, and winner status</td></tr>
+      <tr><td>D9</td><td>Live Stream Sessions</td><td>Stores live class session details and YouTube stream data</td></tr>
+      <tr><td>D10</td><td>Session Data</td><td>Stores temporary session information such as pending verification user id</td></tr>
+    </tbody>
+  </table>
+
+  <h2>DFD Level 2: 1.0 User &amp; Access Management</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Sub Process No.</th>
+        <th>Sub Process Name</th>
+        <th>Inputs</th>
+        <th>Outputs</th>
+        <th>Data Stores</th>
+        <th>External Entities</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1.1</td><td>Register User</td><td>Registration form data</td><td>New unverified user record</td><td>D1 Users</td><td>Student, Teacher</td></tr>
+      <tr><td>1.2</td><td>Send OTP</td><td>User email and OTP</td><td>OTP email sent</td><td>D1 Users</td><td>Email Service</td></tr>
+      <tr><td>1.3</td><td>Verify Email</td><td>OTP entered by user</td><td>Email verified status, account activation if approved</td><td>D1 Users, D10 Session Data</td><td>Student, Teacher</td></tr>
+      <tr><td>1.4</td><td>Login User</td><td>Username/email and password</td><td>Authenticated session, dashboard access</td><td>D1 Users, D10 Session Data</td><td>Student, Teacher, Admin</td></tr>
+      <tr><td>1.5</td><td>Manage User Approval / Block</td><td>Approve/block command</td><td>Updated account status</td><td>D1 Users</td><td>Admin</td></tr>
+      <tr><td>1.6</td><td>Update Profile</td><td>Edited profile information</td><td>Updated profile record</td><td>D1 Users</td><td>Student, Teacher, Admin</td></tr>
+    </tbody>
+  </table>
+
+  <h2>DFD Level 2: 2.0 Course &amp; Enrollment Management</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Sub Process No.</th>
+        <th>Sub Process Name</th>
+        <th>Inputs</th>
+        <th>Outputs</th>
+        <th>Data Stores</th>
+        <th>External Entities</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>2.1</td><td>Create / Update / Delete Course</td><td>Course details, edit/delete action</td><td>Course record created/updated/deleted</td><td>D2 Courses</td><td>Teacher</td></tr>
+      <tr><td>2.2</td><td>Create / Update / Delete Chapter</td><td>Chapter details, edit/delete action</td><td>Chapter record created/updated/deleted</td><td>D3 Chapters, D2 Courses</td><td>Teacher</td></tr>
+      <tr><td>2.3</td><td>View Courses &amp; Chapters</td><td>Course/chapter view request</td><td>Course list, chapter list, chapter content</td><td>D2 Courses, D3 Chapters</td><td>Student, Teacher, Admin</td></tr>
+      <tr><td>2.4</td><td>Enroll Student</td><td>Enrollment request</td><td>Enrollment confirmation</td><td>D4 Enrollments, D2 Courses</td><td>Student</td></tr>
+      <tr><td>2.5</td><td>View / Remove Enrollment</td><td>Enrollment view/removal request</td><td>Enrollment list, removal confirmation</td><td>D4 Enrollments, D2 Courses, D1 Users</td><td>Student, Teacher, Admin</td></tr>
+    </tbody>
+  </table>
+
+  <h2>DFD Level 2: 4.0 Quiz Management &amp; Attempts</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Sub Process No.</th>
+        <th>Sub Process Name</th>
+        <th>Inputs</th>
+        <th>Outputs</th>
+        <th>Data Stores</th>
+        <th>External Entities</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>4.1</td><td>Create / Update / Delete Quiz</td><td>Quiz details, edit/delete action</td><td>Quiz record created/updated/deleted</td><td>D5 Quizzes, D3 Chapters</td><td>Teacher</td></tr>
+      <tr><td>4.2</td><td>Create / Update / Delete Questions</td><td>Question details, edit/delete action</td><td>Question record created/updated/deleted</td><td>D6 Questions &amp; Answers, D5 Quizzes</td><td>Teacher</td></tr>
+      <tr><td>4.3</td><td>Create / Update / Delete Answers</td><td>Answer details, edit/delete action</td><td>Answer record created/updated/deleted</td><td>D6 Questions &amp; Answers</td><td>Teacher</td></tr>
+      <tr><td>4.4</td><td>Attempt Quiz</td><td>Selected answers</td><td>Stored quiz attempt data</td><td>D5 Quizzes, D6 Questions &amp; Answers, D7 Quiz Attempts</td><td>Student</td></tr>
+      <tr><td>4.5</td><td>Calculate Score &amp; Save Result</td><td>Submitted answers</td><td>Score and attempt result</td><td>D7 Quiz Attempts</td><td>Student</td></tr>
+      <tr><td>4.6</td><td>View Quiz Result</td><td>Result request</td><td>Quiz score, submitted answers, correct answers</td><td>D7 Quiz Attempts, D6 Questions &amp; Answers</td><td>Student</td></tr>
+    </tbody>
+  </table>
+
+  <h2>DFD Level 2: 5.0 Article Competition Management</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Sub Process No.</th>
+        <th>Sub Process Name</th>
+        <th>Inputs</th>
+        <th>Outputs</th>
+        <th>Data Stores</th>
+        <th>External Entities</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>5.1</td><td>Submit Article</td><td>Article content and metadata</td><td>New article submission</td><td>D8 Articles</td><td>Student</td></tr>
+      <tr><td>5.2</td><td>Edit / Delete Own Article</td><td>Edit/delete request</td><td>Updated or removed article</td><td>D8 Articles</td><td>Student</td></tr>
+      <tr><td>5.3</td><td>Approve Article</td><td>Approval action</td><td>Approved article status</td><td>D8 Articles</td><td>Teacher, Admin</td></tr>
+      <tr><td>5.4</td><td>Mark Winner</td><td>Winner selection action</td><td>Winner article status</td><td>D8 Articles</td><td>Admin</td></tr>
+      <tr><td>5.5</td><td>View Articles</td><td>Article list request</td><td>Article list and winner display</td><td>D8 Articles</td><td>Student, Teacher, Admin</td></tr>
+    </tbody>
+  </table>
+
+  <h2>DFD Level 2: 6.0 Live Class Management</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Sub Process No.</th>
+        <th>Sub Process Name</th>
+        <th>Inputs</th>
+        <th>Outputs</th>
+        <th>Data Stores</th>
+        <th>External Entities</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>6.1</td><td>Start Live Class</td><td>Course, title, description</td><td>Stream and broadcast creation request</td><td>D2 Courses</td><td>Teacher, YouTube API</td></tr>
+      <tr><td>6.2</td><td>Save Stream Session</td><td>Stream id, broadcast id, RTMP URL, watch URL</td><td>Active live session saved</td><td>D9 Live Stream Sessions</td><td>Teacher</td></tr>
+      <tr><td>6.3</td><td>View Live Class Details</td><td>Session detail request</td><td>Session details</td><td>D9 Live Stream Sessions</td><td>Teacher</td></tr>
+      <tr><td>6.4</td><td>Watch Live Class</td><td>Watch request for a course</td><td>Current live watch URL/session</td><td>D9 Live Stream Sessions, D2 Courses</td><td>Student</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

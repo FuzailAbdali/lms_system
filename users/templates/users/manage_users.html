@@ -13,12 +13,6 @@
     </div>
 </div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-
 <div class="row g-4">
     <div class="col-md-6">
         <div class="card stat-card h-100">

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Start Live Class{% endblock %}
+
+{% block content %}
+<div class="card content-card">
+    <div class="card-body p-4 p-lg-5">
+        <div class="mb-4">
+            <p class="text-uppercase text-muted small fw-semibold mb-1">YouTube Live</p>
+            <h2 class="h3 mb-2">Start Live Class</h2>
+            <p class="text-muted mb-0">Create a YouTube stream and broadcast for one of your courses.</p>
+            <p class="text-muted small mb-0 mt-2">This flow creates the YouTube live stream and gives you the RTMP details to use in OBS or another encoder. It does not open the browser camera directly.</p>
+        </div>
+
+        <form method="post" class="row g-4">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="col-12">
+                    <div class="alert alert-danger mb-0">{{ form.non_field_errors }}</div>
+                </div>
+            {% endif %}
+
+            <div class="col-md-6">
+                <label for="{{ form.course.id_for_label }}" class="form-label">Course</label>
+                {{ form.course }}
+                {% if form.course.errors %}
+                    <div class="text-danger small mt-1">{{ form.course.errors|striptags }}</div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <label for="{{ form.title.id_for_label }}" class="form-label">Live Class Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="text-danger small mt-1">{{ form.title.errors|striptags }}</div>
+                {% endif %}
+            </div>
+
+            <div class="col-12">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger small mt-1">{{ form.description.errors|striptags }}</div>
+                {% endif %}
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2">
+                <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Start Live Class</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

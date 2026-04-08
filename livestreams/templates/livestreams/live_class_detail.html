@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ session.title }}{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Live Class Ready</p>
+            <h2 class="h3 mb-1">{{ session.title }}</h2>
+            <p class="text-muted mb-0">{{ session.course.title }}</p>
+            <p class="text-muted small mb-0 mt-2">Use the RTMP URL and stream key below in OBS or another encoder to send your camera feed to YouTube.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'live_class_studio' session.pk %}" class="btn btn-success">Open Camera Studio</a>
+            <a href="{{ session.watch_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open Watch Page</a>
+            <a href="{% url 'live_class_history' %}" class="btn btn-outline-primary">History</a>
+            <a href="{% url 'live_class_start' %}" class="btn btn-outline-secondary">Start Another</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Status</p>
+                <h3 class="h5 mb-2">{% if session.is_live %}Live{% else %}Offline{% endif %}</h3>
+                <p class="mb-0 text-muted">Created on {{ session.created_at|date:"M d, Y h:i A" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card stat-card h-100">
+            <div class="card-body p-4">
+                <p class="text-uppercase text-muted small fw-semibold mb-3">Streaming Details</p>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Stream Key</label>
+                    <input type="text" class="form-control" value="{{ session.stream_key }}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">RTMP URL</label>
+                    <input type="text" class="form-control" value="{{ session.rtmp_url }}" readonly>
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label fw-semibold">Watch URL</label>
+                    <input type="text" class="form-control" value="{{ session.watch_url }}" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card content-card mt-4">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">Previous Sessions</p>
+                <h3 class="h5 mb-0">Recent History</h3>
+            </div>
+            <a href="{% url 'live_class_history' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+        </div>
+        {% if recent_history %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in recent_history %}
+                            <tr>
+                                <td>{{ item.title }}</td>
+                                <td>{{ item.course.title }}</td>
+                                <td>{{ item.get_ffmpeg_status_display }}</td>
+                                <td>{{ item.created_at|date:"M d, Y h:i A" }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'live_class_detail' item.pk %}" class="btn btn-sm btn-outline-secondary">Open</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted mb-0">No older live sessions yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
